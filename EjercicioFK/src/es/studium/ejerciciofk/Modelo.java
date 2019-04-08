@@ -18,8 +18,7 @@ public class Modelo {
 	}
 	public String americanizacionFecha(String fechaOrigen) {
 		String[] fecha = fechaOrigen.split("/");
-		String fechaAmericana =fecha[1]+"-"+fecha[0]+"-"+fecha[2];
+		String fechaAmericana ="'"+fecha[2]+"-"+fecha[1]+"-"+fecha[0]+"'";
 		return fechaAmericana;
 	}
-
 }

@@ -4,10 +4,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class Controlador implements WindowListener, ActionListener{
 	
@@ -20,10 +22,21 @@ public class Controlador implements WindowListener, ActionListener{
 	java.sql.Statement statement = null;
 	ResultSet rs = null;
 	
+	
+	String facturaMax="";
 	String elegido;
 	String numeroElegido;
+	String nombreArticuloElegido;
 	String fechaTactica;
 	String fechaNormal;
+	int dinerosElegidos=0;
+	int cantidadArticuloElegida=0;
+	String datosDeArticulos="";
+	String[] datosAlmacenados=new String[5];
+	boolean error1=false;
+	
+	int subtotal=0;
+	int total=0;
 	
 	Vista1 v1 = new Vista1();
 	Vista2 v2 = new Vista2();
@@ -34,7 +47,6 @@ public class Controlador implements WindowListener, ActionListener{
 		v1.addWindowListener(this);
 		v1.altaMenu.addActionListener(this);
 		v1.setVisible(true);
-		v3.addWindowListener(this);
 	}
 	
 	@Override
@@ -61,22 +73,159 @@ public class Controlador implements WindowListener, ActionListener{
 			v2.setVisible(false);
 		} else if (v2.okCorrecto.equals(arg0.getSource())) {
 			v2.correcto.setVisible(false);
-			v3.setVisible(true);
+			CogerNumeroFacturaReciente();
+			if(error1==true) {
+			System.out.println("error1");
+			}else if(error1==false){
+			v3.numeroFactura.setText(facturaMax);
 			v3.addWindowListener(this);
+			MeteEseArticulo();
+			v3.agregarDetalle.addActionListener(this);
+			v3.aceptarDatos.addActionListener(this);
+			v3.cancelarDatos.addActionListener(this);
+			v3.setVisible(true);
+			}
 		} else if(v2.dxIncorrecto.equals(arg0.getSource())) {
 			v2.incorrecto.setVisible(false);
+			v2.setVisible(true);
+		} else if(v3.agregarDetalle.equals(arg0.getSource())) {
+			AgregameEsta();
+		}else if(v3.aceptarDatos.equals(arg0.getSource())) {
+			InsertarFactura();
+			System.out.println("La metiste bien");
+			//meter un dialog si quiere hacer otra factura o salir
+		}else if(v3.cancelarDatos.equals(arg0.getSource())) {
+			v3.setVisible(false);
 			v2.setVisible(true);
 		}
 		
 	}
 
+	private void InsertarFactura() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void AgregameEsta() {
+		String articuloElegido = m.Elegir(v3.articuloDetalleC.getSelectedItem());
+		RecogeElDinero(articuloElegido);
+		int cantidadArticuloElegida = Integer.parseInt(v3.cantidadDetalleT.getText());
+		datosAlmacenados[0]=articuloElegido;
+		AlmacenaNombre(articuloElegido);
+		datosAlmacenados[1]=nombreArticuloElegido;
+		datosAlmacenados[3]=dinerosElegidos+"";
+		datosAlmacenados[2]=""+cantidadArticuloElegida;
+		for(int i=0;i<cantidadArticuloElegida;i++) {
+			subtotal=subtotal+dinerosElegidos;
+			total=total+dinerosElegidos;
+		}
+		datosAlmacenados[4]=subtotal+"";
+		subtotal=0;
+		MeteTodoArticulos();
+		v3.tablaDatos.append("\n"+datosDeArticulos);
+		v3.totalDatoT.setText(""+total);
+	}
+
+	private void AlmacenaNombre(String articuloElegido) {
+		sentencia="Select descripcionArticulo as 'nombre' from ejemplofk.articulos where idArticulo=+'"+articuloElegido+"';";
+		try {
+			conectar();
+			statement = connection.createStatement();
+			rs = statement.executeQuery(sentencia);
+			rs.next();
+			nombreArticuloElegido=rs.getString("nombre");
+		}catch (SQLException sqle)
+		{
+			System.out.println("Error 2: "+sqle.getMessage());
+		}
+		
+		finally
+		{
+			desconectar();
+		}			
+		
+	}
+
+	private void MeteTodoArticulos() {
+		datosDeArticulos=""+datosAlmacenados[0]+"  "+datosAlmacenados[1]+"		"+datosAlmacenados[2]+"  "+datosAlmacenados[3]+"    "+datosAlmacenados[4];
+	}
+
+	private void RecogeElDinero(String articuloElegido) {
+		sentencia="Select precioArticulo as 'money' from ejemplofk.articulos where idArticulo"
+				+ "='"+articuloElegido+"';";
+		try {
+			conectar();
+			statement = connection.createStatement();
+			rs = statement.executeQuery(sentencia);
+			rs.next();
+			dinerosElegidos=rs.getInt("money");
+		}catch (SQLException sqle)
+		{
+			System.out.println("Error 2: "+sqle.getMessage());
+		}
+		
+		finally
+		{
+			desconectar();
+		}				
+	}
+
+	private void MeteEseArticulo() {
+		sentencia="Select * from ejemplofk.articulos";
+		int datosChoice;
+		String nombreChoice;
+		try
+		{
+			conectar();
+			statement = connection.createStatement();
+			rs = statement.executeQuery(sentencia);
+			while (rs.next())
+			{
+				datosChoice =rs.getInt("idArticulo");
+				nombreChoice = rs.getString("descripcionArticulo");
+				v3.articuloDetalleC.addItem(datosChoice+" - "+nombreChoice);
+			}
+		}
+		catch (SQLException sqle)
+		{
+			v2.incorrecto();
+			System.out.println("Error 2: "+sqle.getMessage());
+		}
+		
+		finally
+		{
+			desconectar();
+		}			
+	}
+
+	private void CogerNumeroFacturaReciente() {
+		sentencia="SELECT MAX(idFactura) as 'maximo' from ejemplofk.facturas";
+		try
+		{
+			conectar();
+			statement = connection.createStatement();
+			rs = statement.executeQuery(sentencia);
+			rs.next();
+			facturaMax=rs.getInt("maximo")+"";
+			desconectar();
+		}catch(SQLException error){
+			v2.incorrecto();
+			System.out.println("SQl te dio el siguiente error:");
+			System.out.println(error);
+			if(facturaMax=="") {
+				error1 = true;
+			}
+		}
+	}
+
 	private void InsertarDatos() {
-		conectar();
 		sentencia="INSERT INTO ejemplofk.facturas VALUES(null,"+fechaTactica+","+numeroElegido+");";
 		try {
+		conectar();
 		statement = connection.createStatement();
 		statement.executeUpdate(sentencia);
 		v2.correcto();
+		desconectar();
 		} catch(SQLException error)
 		{
 			v2.incorrecto();

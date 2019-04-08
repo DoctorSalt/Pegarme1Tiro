@@ -56,7 +56,7 @@ public class Vista2 extends Frame{
 		correcto.setVisible(true);
 	}
 	public void incorrecto() {
-		incorrecto.setTitle("Correcto");
+		incorrecto.setTitle("Incorrecto");
 		incorrecto.setSize(300,200);
 		incorrecto.setLocationRelativeTo(null);
 		incorrecto.add(malIncorrecto);
