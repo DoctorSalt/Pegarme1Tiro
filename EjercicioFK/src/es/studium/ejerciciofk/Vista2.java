@@ -22,11 +22,7 @@ public class Vista2 extends Frame{
 	Panel panelA1 = new Panel();
 	Panel panelA2 = new Panel();
 	Panel panelA3 = new Panel();
-	
-	Dialog correcto = new Dialog(this, true);
-	Label bienCorrecto = new Label("La metiste bien wey");
-	Button okCorrecto = new Button("OK");
-	
+		
 	Dialog incorrecto = new Dialog(this, true);
 	Label malIncorrecto = new Label("Salio mal wey");
 	Button dxIncorrecto = new Button("DX patras");
@@ -47,14 +43,7 @@ public class Vista2 extends Frame{
 		add(panelA3);
 	}
 	
-	public void correcto() {
-		correcto.setTitle("Correcto");
-		correcto.setSize(300,200);
-		correcto.setLocationRelativeTo(null);
-		correcto.add(bienCorrecto);
-		correcto.add(okCorrecto);
-		correcto.setVisible(true);
-	}
+	
 	public void incorrecto() {
 		incorrecto.setTitle("Incorrecto");
 		incorrecto.setSize(300,200);

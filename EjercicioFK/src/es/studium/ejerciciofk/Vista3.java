@@ -54,9 +54,11 @@ public class Vista3 extends Frame{
 		panel22.add(agregarDetalle);
 		panel2.add(panel22);
 		add(panel2);
+		tablaDatos.setEditable(false);
 		tablaDatos.setText("idArticulo  "+"Descripcion		"+"Cantidad  "+"Precio    "+"Subtotal");
 		panel3.add(tablaDatos);
 		add(panel3);
+		totalDatoT.setEditable(false);
 		panel4.add(totalDatos);
 		panel4.add(totalDatoT);
 		add(panel4);
